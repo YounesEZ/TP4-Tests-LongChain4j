@@ -17,6 +17,7 @@ import dev.langchain4j.rag.DefaultRetrievalAugmentor;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.rag.query.router.LanguageModelQueryRouter;
 import dev.langchain4j.rag.query.router.QueryRouter;
 import dev.langchain4j.rag.query.transformer.CompressingQueryTransformer;
@@ -30,8 +31,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -129,13 +129,34 @@ public class RagNaif {
                 .build();
 
 
-        QueryRouter router = LanguageModelQueryRouter.builder()
-                .chatLanguageModel(modele)
-                .retrieverToDescription(Map.of(
-                        retriever1, "Cours concernant les principes du machine learning et l'IA Generative",
-                        retriever2, "Cours concernant le fine tuning et l'architecture RAG"
-                ))
-                .build();
+        class QueryRouterPersonalise implements QueryRouter {
+
+            @Override
+            public Collection<ContentRetriever> route(Query query) {
+                String question = "Est-ce que la requête '" + query.text()
+                        + "' porte sur l'IA ? "
+                        + "Réponds seulement par 'oui', 'non', ou 'peut-être'.";
+                String reponse = modele.generate(question);
+                if (reponse.toLowerCase().contains("non")) {
+                    // Pas de RAG
+                    return Collections.emptyList();
+                } else {
+                    question = "Est_ce que la requête '" + query.text()
+                            + "' porte sur le fine-tuning ou le RAG ? ";
+                    reponse = modele.generate(question);
+                    if(reponse.toLowerCase().contains("non")) {
+                       return List.of(retriever1);
+                    }
+                    else {
+                        return List.of(retriever2);
+                    }
+                }
+            }
+        }
+
+
+
+        QueryRouter router = new QueryRouterPersonalise();
 
 
         QueryTransformer transformer = CompressingQueryTransformer.builder()
