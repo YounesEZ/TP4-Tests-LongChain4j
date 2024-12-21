@@ -142,7 +142,8 @@ public class RagNaif {
                     return Collections.emptyList();
                 } else {
                     question = "Est_ce que la requête '" + query.text()
-                            + "' porte sur le fine-tuning ou le RAG ? ";
+                            + "' porte sur le fine-tuning ou le RAG ? "
+                            + "Réponds seulement par 'oui', 'non', ou 'peut-être'.";
                     reponse = modele.generate(question);
                     if(reponse.toLowerCase().contains("non")) {
                        return List.of(retriever1);
@@ -193,8 +194,5 @@ public class RagNaif {
                 System.out.println("Assistant : " + reponse);
             }
         }
-
-
-
     }
 }
