@@ -182,6 +182,7 @@ public class RagNaif {
                 .build();
 
 
+
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
 
 
