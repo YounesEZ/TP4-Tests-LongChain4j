@@ -17,7 +17,9 @@ import dev.langchain4j.rag.DefaultRetrievalAugmentor;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+import dev.langchain4j.rag.content.retriever.WebSearchContentRetriever;
 import dev.langchain4j.rag.query.Query;
+import dev.langchain4j.rag.query.router.DefaultQueryRouter;
 import dev.langchain4j.rag.query.router.LanguageModelQueryRouter;
 import dev.langchain4j.rag.query.router.QueryRouter;
 import dev.langchain4j.rag.query.transformer.CompressingQueryTransformer;
@@ -26,6 +28,8 @@ import dev.langchain4j.service.AiServices;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
+import dev.langchain4j.web.search.WebSearchEngine;
+import dev.langchain4j.web.search.tavily.TavilyWebSearchEngine;
 
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -129,6 +133,14 @@ public class RagNaif {
                 .build();
 
 
+        WebSearchEngine webSearchEngine = TavilyWebSearchEngine.builder()
+                .apiKey(System.getenv("TAVILY_KEY"))
+                .build();
+
+        ContentRetriever webretriever = WebSearchContentRetriever.builder()
+                .webSearchEngine(webSearchEngine)
+                .build();
+
         class QueryRouterPersonalise implements QueryRouter {
 
             @Override
@@ -157,8 +169,8 @@ public class RagNaif {
 
 
 
-        QueryRouter router = new QueryRouterPersonalise();
-
+        //QueryRouter router = new QueryRouterPersonalise();
+        QueryRouter routerWebOrPDF = new DefaultQueryRouter(List.of(retriever2, webretriever));
 
         QueryTransformer transformer = CompressingQueryTransformer.builder()
                 .chatLanguageModel(modele)
@@ -166,7 +178,7 @@ public class RagNaif {
 
         RetrievalAugmentor augmentor = DefaultRetrievalAugmentor.builder()
                 .queryTransformer(transformer)
-                .queryRouter(router)
+                .queryRouter(routerWebOrPDF)
                 .build();
 
 
