@@ -36,6 +36,17 @@
             <artifactId>langchain4j-easy-rag</artifactId>
             <version>0.36.2</version>
         </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-document-parser-apache-tika</artifactId>
+            <version>0.36.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-embeddings-all-minilm-l6-v2 -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
+            <version>0.36.2</version>
+        </dependency>
     </dependencies>
 
 </project>
